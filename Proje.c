@@ -161,15 +161,94 @@ int checkDraw(Board *b)
 
 // ============ TAVEZ - BOARD FUNCTIONS ============
 
-// TODO: initBoard - fill all cells with EMPTY, set rows and cols
+// Initializes the board with EMPTY
+void initBoard(Board *b)
+{
 
-// TODO: printBoard - print the board nicely with column numbers
+    b->rows = ROWS;
+    b->cols = COLS;
 
-// TODO: isColumnValid - check if col is between 0 and cols-1
+    int i, j;
 
-// TODO: isColumnFull - check if top cell of column is not EMPTY
+    for (i = 0; i < ROWS; i++)
+    {
+        for (j = 0; j < COLS; j++)
+        {
+            b->cells[i][j] = EMPTY;
+        }
+    }
+}
 
-// TODO: makeMove - drop piece into column (gravity effect)
+// Prints the board, and the 2 final lines
+void printBoard(Board *b)
+{
+
+    int i, j;
+    int rows, cols;
+
+    rows = b->rows;
+    cols = b->cols;
+
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < cols; j++)
+        {
+            printf("%c ", b->cells[i][j]);
+        }
+        printf("\n");
+    }
+
+    for (i = 0; i < cols; i++)
+    {
+        printf("--");
+    }
+    printf("\n");
+
+    for (i = 0; i < cols; i++)
+    {
+        printf("%d ", i + 1);
+    }
+}
+
+// Checks if the column is between the normal values
+int isColumnValid(Board *b, int col)
+{
+    int cols = b->cols;
+    if (col < 0 || col > cols - 1)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+// Checks if the column is already full
+int isColumnFull(Board *b, int col)
+{
+
+    if (b->cells[0][col] != EMPTY)
+        return 1;
+
+    return 0;
+}
+
+// Finds the lowest row, places the piece , and updates the row value
+int makeMove(Board *b, int col, char piece, int *row)
+{
+    int i = 0;
+
+    do
+    {
+        i++;
+    } while (i < b->rows && b->cells[i][col] == EMPTY);
+
+    b->cells[i - 1][col] = piece;
+    *row = (i - 1);
+
+    return 1;
+}
 
 // ============ KEN - MENU AND GAME FUNCTIONS ============
 
