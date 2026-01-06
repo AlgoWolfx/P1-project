@@ -253,15 +253,114 @@ int makeMove(Board *b, int col, char piece, int *row)
 // ============ KEN - MENU AND GAME FUNCTIONS ============
 
 // TODO: clearBuffer - read characters until newline or EOF
+void clearBuffer(void)
+{
+    while (getchar() != '\n')
+        ;
+}
 
 // TODO: showMainMenu - show menu, return 1 for new game, 0 for exit
+int showMainMenu(void)
+{
+
+    int i;
+
+    do
+    {
+        i = -1;
+
+        printf("Bem-vindo ao Jogo Quatro-em-linha!\n");
+        printf("Por favor digite a opção que prentede: \n");
+        printf("1 - Iniciar Novo Jogo\n");
+        printf("2 - Retomar Jogo Guardado\n");
+        printf("3 - Configurar Tabuleiro\n");
+        printf("0 - Sair\n");
+
+        scanf("%d", &i);
+
+        clearBuffer();
+
+        if (i < 0 || i > 3)
+            printf("Opção do menu inválida!");
+
+    } while (i < 0 || i > 3);
+    return i;
+}
 
 // TODO: showModeMenu - show mode menu, return 1, 2, or 0
+int showModeMenu(void)
+{
+    int j;
+
+    do
+    {
+        j = -1;
+
+        printf("Por favor digite o modo que pretende: \n");
+        printf("1 - Humano x Humano\n");
+        printf("2 - Humano x Máquina\n");
+        printf("0 - Voltar ao menu anterior\n");
+
+        scanf("%d", &j);
+
+        clearBuffer();
+
+        if (j < 0 || j > 2)
+            printf("Opção do menu inválida!");
+
+    } while (j < 0 || j > 2);
+    return j;
+}
 
 // TODO: getHumanMove - ask player for column, validate, return column index
 
-// TODO: getMachineMove - pick random valid column for machine
+int getHumanMove(Game *g)
+{
+    int col;
+    int input;
 
-// TODO: playGame - main game loop
+    do
+    {
+        printf("Jogador: %d - Escolha a coluna(1-%d) ", g->currentPlayer, g->board.cols);
 
-// TODO: main - program entry point
+        input = scanf("%d", &col);
+        clearBuffer();
+
+        if (input != 1)
+        {
+            printf("Escreva um número inteiro positivo!");
+            continue;
+        }
+        col--;
+
+        if (isColumnValid(&g->board, col) != 1)
+        {
+            printf("Jogada inválida! (Coluna inexistente)\n");
+            continue;
+        }
+        if (isColumnFull(&g->board, col) == 1)
+        {
+            printf("Jogada inválida! (Coluna cheia)\n");
+            continue;
+        }
+        return col;
+    
+    }while(1);
+}
+    // TODO: getMachineMove - pick random valid column for machine
+    int getMachineMove(Game *g){
+        int col;
+
+        do {
+        col = rand() % g->board.cols;
+        
+    } while (isColumnFull(&g->board, col));
+    
+    printf("A Maquina jogou na coluna %d\n", col + 1);
+    
+    return col;
+    }
+
+    // TODO: playGame - main game loop
+
+    // TODO: main - program entry point
