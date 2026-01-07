@@ -306,7 +306,7 @@ int showModeMenu(void)
         clearBuffer();
 
         if (j < 0 || j > 2)
-            printf("Opção do menu inválida!");
+            printf("\nOpção do menu inválida!");
 
     } while (j < 0 || j > 2);
     return j;
@@ -321,21 +321,21 @@ int getHumanMove(Game *g)
 
     do
     {
-        printf("Jogador: %d - Escolha a coluna(1-%d) ", g->currentPlayer, g->board.cols);
+        printf("\nJogador: %d - Escolha a coluna(1-%d) ", g->currentPlayer, g->board.cols);
 
         input = scanf("%d", &col);
         clearBuffer();
 
         if (input != 1)
         {
-            printf("Escreva um número inteiro positivo!");
+            printf("\nEscreva um número inteiro positivo!");
             continue;
         }
         col--;
 
         if (isColumnValid(&g->board, col) != 1)
         {
-            printf("Jogada inválida! (Coluna inexistente)\n");
+            printf("\nJogada inválida! (Coluna inexistente)\n");
             continue;
         }
         if (isColumnFull(&g->board, col) == 1)
@@ -344,23 +344,118 @@ int getHumanMove(Game *g)
             continue;
         }
         return col;
-    
-    }while(1);
+
+    } while (1);
 }
-    // TODO: getMachineMove - pick random valid column for machine
-    int getMachineMove(Game *g){
-        int col;
+// TODO: getMachineMove - pick random valid column for machine
+int getMachineMove(Game *g)
+{
+    int col;
 
-        do {
+    do
+    {
         col = rand() % g->board.cols;
-        
+
     } while (isColumnFull(&g->board, col));
-    
+
     printf("A Maquina jogou na coluna %d\n", col + 1);
-    
+
     return col;
+}
+
+// TODO: playGame - main game loop
+
+void playGame(Game *g)
+{
+
+    int turn = 0;
+    int col, row;
+    int game = 1;
+
+    printf("INICIO DO JOGO");
+    printBoard(&g->board);
+
+    while (game == 1)
+    {
+        if (g->currentPlayer == 1)
+        {
+            col = getHumanMove(g);
+        }
+        else
+        {
+            if (g->mode == 1)
+            {
+                col = getHumanMove(g);
+            }
+            else
+            {   
+                col = getMachineMove(g);
+            }
+        }
+
+        char piece;
+
+        if (g->currentPlayer == 1)
+        {
+            piece = PLAYER1;
+        }
+        else
+        {
+            piece = PLAYER2;
+        }
+        makeMove(&g->board, col, piece, &row);
+
+        printBoard(&g->board);
+
+        if (checkWin(&g->board, row, col, piece))
+        {
+            printf("Parabens! O jogador %d ganhou!\n", g->currentPlayer);
+            game = 0;
+        }
+        else if (checkDraw(&g->board))
+        {
+            printf("O jogo terminou empatado");
+            game = 0;
+        }
+        else
+        {
+            if (g->currentPlayer == 1)
+            {
+                g->currentPlayer = 2;
+            }
+            else
+            {
+                g->currentPlayer = 1;
+            }
+        }
     }
+}
 
-    // TODO: playGame - main game loop
+// TODO: main - program entry point
+int main(){
+    Game game;
+    int opcao;
 
-    // TODO: main - program entry point
+    do{
+        opcao = showMainMenu();
+
+        if(opcao == 1){
+            int modo = showModeMenu();
+
+            if(modo != 0){
+                game.mode = modo;
+                game.currentPlayer = 1;
+                initBoard(&game.board);
+
+                playGame(&game);
+            }
+        }
+        else if (opcao == 2) {
+            printf("Funcionalidade de retomar jogo (Fase 2)...\n");
+        }
+        else if (opcao == 3) {
+            printf("Funcionalidade de configurar tabuleiro (Fase 2)...\n");
+        }
+    }while(opcao != 0);
+return 0;
+}
