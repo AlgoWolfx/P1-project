@@ -17,9 +17,9 @@
 // Board struct - keeps the game board data
 typedef struct
 {
-    int rows;               // number of rows
-    int cols;               // number of columns
-    char cells[ROWS][COLS]; // the board cells
+    int rows;                   
+    int cols;               
+    char cells[ROWS][COLS]; 
 } Board;
 
 // Game struct - keeps all game info
@@ -30,19 +30,14 @@ typedef struct
     int mode;          // 1 = human vs human, 2 = human vs machine
 } Game;
 
-// Yigit's functions (game logic)
-int countInDirection(Board *b, int row, int col, int dRow, int dCol, char piece);
-int checkWin(Board *b, int row, int col, char piece);
-int checkDraw(Board *b);
-
-// Tavez's functions (board)
+int countInDirection(Board b, int row, int col, int dRow, int dCol, char piece);
+int checkWin(Board b, int row, int col, char piece);
+int checkDraw(Board b);
 void initBoard(Board *b);
 void printBoard(Board *b);
 int isColumnValid(Board *b, int col);
 int isColumnFull(Board *b, int col);
 int makeMove(Board *b, int col, char piece, int *row);
-
-// Ken's functions (menu and game)
 void clearBuffer(void);
 int showMainMenu(void);
 int showModeMenu(void);
@@ -50,113 +45,88 @@ int getHumanMove(Game *g);
 int getMachineMove(Game *g);
 void playGame(Game *g);
 
-/*
- * countInDirection - counts pieces in one direction
- *
- * b = pointer to board
- * row, col = starting position
- * dRow, dCol = direction to check (like -1,0 means go up)
- * piece = what piece to count ('X' or 'O')
- *
- * returns: how many same pieces in that direction
- */
-int countInDirection(Board *b, int row, int col, int dRow, int dCol, char piece)
+
+//Counts the amount of times the piece appears in a direction
+int countInDirection(Board b, int row, int col, int dRow, int dCol, char piece)
 {
     int count = 0;
-    int r = row + dRow; // start from next cell
+    int r = row + dRow; 
     int c = col + dCol;
 
-    // keep going while inside board and same piece
-    while (r >= 0 && r < b->rows && c >= 0 && c < b->cols)
+   while (r >= 0 && r < b.rows && c >= 0 && c < b.cols)
     {
-        if (b->cells[r][c] == piece)
+        if (b.cells[r][c] == piece)
         {
             count++;
-            r = r + dRow; // move to next cell
-            c = c + dCol;
+            r += dRow; 
+            c += dCol;
         }
         else
         {
-            break; // different piece, stop counting
+            break; 
         }
     }
 
     return count;
 }
 
-/*
- * checkWin - checks if player won after their move
- *
- * b = pointer to board
- * row, col = where the piece was placed
- * piece = the piece that was placed
- *
- * returns: 1 if win, 0 if no win
- */
-int checkWin(Board *b, int row, int col, char piece)
+//checks after every play if it wins the game
+int checkWin(Board b, int row, int col, char piece)
 {
     int total;
 
-    // check horizontal (left + right + 1)
     total = 1;
-    total = total + countInDirection(b, row, col, 0, -1, piece); // left
-    total = total + countInDirection(b, row, col, 0, 1, piece);  // right
+    total += countInDirection(b, row, col, 0, -1, piece);
+    total += countInDirection(b, row, col, 0, 1, piece);  
     if (total >= WIN_LENGTH)
     {
-        return 1; // horizontal win!
+        return 1; // horizontal
     }
 
-    // check vertical (up + down + 1)
+    
     total = 1;
-    total = total + countInDirection(b, row, col, -1, 0, piece); // up
-    total = total + countInDirection(b, row, col, 1, 0, piece);  // down
+    total += countInDirection(b, row, col, -1, 0, piece); 
+    total += countInDirection(b, row, col, 1, 0, piece); 
     if (total >= WIN_LENGTH)
     {
-        return 1; // vertical win!
+        return 1; // vertical
     }
 
-    // check diagonal \ (top-left + bottom-right + 1)
+    
     total = 1;
-    total = total + countInDirection(b, row, col, -1, -1, piece); // top-left
-    total = total + countInDirection(b, row, col, 1, 1, piece);   // bottom-right
+    total += countInDirection(b, row, col, -1, -1, piece); 
+    total += countInDirection(b, row, col, 1, 1, piece);   
     if (total >= WIN_LENGTH)
     {
-        return 1; // diagonal win!
+        return 1; // diagonal
     }
 
-    // check diagonal / (top-right + bottom-left + 1)
+    
     total = 1;
-    total = total + countInDirection(b, row, col, -1, 1, piece); // top-right
-    total = total + countInDirection(b, row, col, 1, -1, piece); // bottom-left
+    total += countInDirection(b, row, col, -1, 1, piece);
+    total += countInDirection(b, row, col, 1, -1, piece); 
     if (total >= WIN_LENGTH)
     {
-        return 1; // diagonal win!
+        return 1; // diagonal 
     }
 
-    return 0; // no win yet
+    return 0;
 }
 
-/*
- * checkDraw - checks if board is full (draw)
- *
- * b = pointer to board
- *
- * returns: 1 if draw (board full), 0 if not full
- */
-int checkDraw(Board *b)
+//checks Draw after every play 
+int checkDraw(Board b)
 {
     int col;
 
-    // check top row - if any cell empty, not a draw
-    for (col = 0; col < b->cols; col++)
+    for (col = 0; col < b.cols; col++)
     {
-        if (b->cells[0][col] == EMPTY)
+        if (b.cells[0][col] == EMPTY)
         {
-            return 0; // found empty cell, not draw
+            return 0; 
         }
     }
 
-    return 1; // all top cells full = draw
+    return 1; 
 }
 
 // ============ TAVEZ - BOARD FUNCTIONS ============
@@ -435,6 +405,9 @@ void playGame(Game *g)
 int main(){
     Game game;
     int opcao;
+
+    srand(time(NULL));
+
 
     do{
         opcao = showMainMenu();
