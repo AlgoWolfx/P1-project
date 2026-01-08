@@ -34,9 +34,9 @@ int countInDirection(Board b, int row, int col, int dRow, int dCol, char piece);
 int checkWin(Board b, int row, int col, char piece);
 int checkDraw(Board b);
 void initBoard(Board *b);
-void printBoard(Board *b);
-int isColumnValid(Board *b, int col);
-int isColumnFull(Board *b, int col);
+void printBoard(Board b);
+int isColumnValid(Board b, int col);
+int isColumnFull(Board b, int col);
 int makeMove(Board *b, int col, char piece, int *row);
 void clearBuffer(void);
 int showMainMenu(void);
@@ -129,7 +129,6 @@ int checkDraw(Board b)
     return 1; 
 }
 
-// ============ TAVEZ - BOARD FUNCTIONS ============
 
 // Initializes the board with EMPTY
 void initBoard(Board *b)
@@ -150,41 +149,36 @@ void initBoard(Board *b)
 }
 
 // Prints the board, and the 2 final lines
-void printBoard(Board *b)
+void printBoard(Board b)
 {
 
     int i, j;
-    int rows, cols;
 
-    rows = b->rows;
-    cols = b->cols;
-
-    for (i = 0; i < rows; i++)
+    for (i = 0; i < b.rows; i++)
     {
-        for (j = 0; j < cols; j++)
+        for (j = 0; j < b.cols; j++)
         {
-            printf("%c ", b->cells[i][j]);
+            printf("%c ", b.cells[i][j]);
         }
         printf("\n");
     }
 
-    for (i = 0; i < cols; i++)
+    for (i = 0; i < b.cols; i++)
     {
         printf("--");
     }
     printf("\n");
 
-    for (i = 0; i < cols; i++)
+    for (i = 0; i < b.cols; i++)
     {
         printf("%d ", i + 1);
     }
 }
 
 // Checks if the column is between the normal values
-int isColumnValid(Board *b, int col)
+int isColumnValid(Board b, int col)
 {
-    int cols = b->cols;
-    if (col < 0 || col > cols - 1)
+    if (col < 0 || col >= b.cols)
     {
         return 0;
     }
@@ -195,27 +189,32 @@ int isColumnValid(Board *b, int col)
 }
 
 // Checks if the column is already full
-int isColumnFull(Board *b, int col)
+int isColumnFull(Board b, int col)
 {
-
-    if (b->cells[0][col] != EMPTY)
+    if (b.cells[0][col] != EMPTY)
         return 1;
 
-    return 0;
-}
+    else
+        return 0;
 
+}
 // Finds the lowest row, places the piece , and updates the row value
 int makeMove(Board *b, int col, char piece, int *row)
 {
     int i = 0;
 
-    do
+    while (i < b->rows)
     {
+        if(b->cells[i][col] == EMPTY){
         i++;
-    } while (i < b->rows && b->cells[i][col] == EMPTY);
+        }
+        else{
+            break;
+        }
+    }
 
     b->cells[i - 1][col] = piece;
-    *row = (i - 1);
+    *row = i - 1;
 
     return 1;
 }
