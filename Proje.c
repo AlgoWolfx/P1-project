@@ -41,8 +41,8 @@ int makeMove(Board *b, int col, char piece, int *row);
 void clearBuffer(void);
 int showMainMenu(void);
 int showModeMenu(void);
-int getHumanMove(Game *g);
-int getMachineMove(Game *g);
+int getHumanMove(Game g);
+int getMachineMove(Game g);
 void playGame(Game *g);
 
 
@@ -282,14 +282,14 @@ int showModeMenu(void)
 
 //  getHumanMove - ask player for column, validate, return column index
 
-int getHumanMove(Game *g)
+int getHumanMove(Game g)
 {
     int col;
     int valido = 0;
 
     while(valido == 0)
     {
-        printf("\nJogador: %d - Escolha a coluna(1-%d) ", g->currentPlayer, g->board.cols);
+        printf("\nJogador: %d - Escolha a coluna(1-%d) ", g.currentPlayer, g.board.cols);
 
         col = -1;
         scanf("%d", &col);
@@ -297,13 +297,13 @@ int getHumanMove(Game *g)
 
         col--;
 
-        if (isColumnValid(g->board, col) != 1)
+        if (isColumnValid(g.board, col) != 1)
         {
             printf("\nJogada inválida! (Coluna inexistente)\n");
             
         }
-        else if (isColumnFull(g->board, col) == 1)
-        {
+        else if (isColumnFull(g.board, col) == 1)
+        {   
             printf("Jogada inválida! (Coluna cheia)\n");
             
         }
@@ -314,22 +314,22 @@ int getHumanMove(Game *g)
     return col;
 }
 //  getMachineMove - pick random valid column for machine
-int getMachineMove(Game *g)
+int getMachineMove(Game g)
 {
     int col;
 
     do
     {
-        col = rand() % g->board.cols;
+        col = rand() % g.board.cols;
 
-    } while (isColumnFull(&g->board, col));
+    } while (isColumnFull(g.board, col));
 
     printf("A Maquina jogou na coluna %d\n", col + 1);
 
     return col;
 }
 
-// TODO: playGame - main game loop
+// playGame - main game loop
 
 void playGame(Game *g)
 {
@@ -339,23 +339,23 @@ void playGame(Game *g)
     int game = 1;
 
     printf("INICIO DO JOGO");
-    printBoard(&g->board);
+    printBoard(g->board);
 
     while (game == 1)
     {
         if (g->currentPlayer == 1)
         {
-            col = getHumanMove(g);
+            col = getHumanMove(*g);
         }
         else
         {
             if (g->mode == 1)
             {
-                col = getHumanMove(g);
+                col = getHumanMove(*g);
             }
             else
             {   
-                col = getMachineMove(g);
+                col = getMachineMove(*g);
             }
         }
 
@@ -371,14 +371,14 @@ void playGame(Game *g)
         }
         makeMove(&g->board, col, piece, &row);
 
-        printBoard(&g->board);
+        printBoard(g->board);
 
-        if (checkWin(&g->board, row, col, piece))
+        if (checkWin(g->board, row, col, piece))
         {
             printf("Parabens! O jogador %d ganhou!\n", g->currentPlayer);
             game = 0;
         }
-        else if (checkDraw(&g->board))
+        else if (checkDraw(g->board))
         {
             printf("O jogo terminou empatado");
             game = 0;
@@ -399,32 +399,34 @@ void playGame(Game *g)
 
 // TODO: main - program entry point
 int main(){
-    Game game;
-    int opcao;
+    Game g;
+    int opt, mod;
 
     srand(time(NULL));
 
 
     do{
-        opcao = showMainMenu();
+        opt = showMainMenu();
 
-        if(opcao == 1){
-            int modo = showModeMenu();
+        if(opt == 1){
+            mod = showModeMenu();
 
-            if(modo != 0){
-                game.mode = modo;
-                game.currentPlayer = 1;
-                initBoard(&game.board);
+            if(mod != 0){
+                g.mode = mod;
+                g.currentPlayer = 1;
+                initBoard(&g.board);
 
-                playGame(&game);
+                playGame(&g);
             }
+            else 
+                continue;
         }
-        else if (opcao == 2) {
+        else if (opt == 2) {
             printf("Funcionalidade de retomar jogo (Fase 2)...\n");
         }
-        else if (opcao == 3) {
+        else if (opt == 3) {
             printf("Funcionalidade de configurar tabuleiro (Fase 2)...\n");
         }
-    }while(opcao != 0);
+    }while(opt != 0);
 return 0;
 }
