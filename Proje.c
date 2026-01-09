@@ -30,6 +30,10 @@ typedef struct
     Board board;       // the board
     int currentPlayer; // who plays now (1 or 2)
     int mode;          // 1 = human vs human, 2 = human vs machine
+    int moves;
+    int p1undos;
+    int p2undos;
+    int his[100];
 } Game;
 
 int countInDirection(Board b, int row, int col, int dRow, int dCol, char piece);
@@ -324,6 +328,9 @@ int getHumanMove(Game g)
             save(&g);
             return -2;
         }
+        if(strcmp(text , "anular") == 0){
+            return -3;
+        }
         
         col = atoi(text);
         
@@ -383,12 +390,27 @@ int load(Game *g){
 }
 // playGame - main game loop
 
+int removepiece(Board *b, int col){
+
+    int i;
+    
+    for(i = 0; i < b->rows; i++){
+        if(b->cells[i][col] != 0){
+            b->cells[i][col] = 0;
+        
+            return 1;
+        }
+    }
+
+}
+
 void playGame(Game *g)
 {
 
     int turn = 0;
     int col, row;
     int game = 1;
+    int undos, lastcol, prevcol;
 
     printf("\nINICIO DO JOGO\n");
     printBoard(g->board);
@@ -414,6 +436,41 @@ void playGame(Game *g)
         if(col == -2){
             break;
         }
+        if(col == -3){
+            if(g->moves < 2 ){
+                printf("Nao ha jogadas suficientes.\n");
+                continue;
+            }
+
+            if(g->currentPlayer == 1){
+                undos = g->p1undos;
+                g->p1undos--;
+            }
+            else{
+                undos = g->p2undos;
+                g->p2undos--;
+            }
+
+            if(undos > 0){
+                lastcol = g->his[g->moves - 1];
+                prevcol = g->his[g->moves - 2];
+            
+
+                removepiece(&g->board, lastcol);
+                removepiece(&g->board, prevcol);
+
+                g->moves -= 2;
+
+                printf("Jogadas anuladas com sucesso");
+            }
+
+            
+            continue;
+        }
+        
+        g->his[g->moves] = col;
+        g->moves++;
+        
         
         char piece;
 
@@ -478,6 +535,10 @@ int main()
                 g.mode = mod;
                 g.currentPlayer = 1;
                 initBoard(&g.board);
+
+                g.moves = 0;
+                g.p1undos = 2;
+                g.p2undos = 2;
 
                 playGame(&g);
             }
