@@ -1,12 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdlib.h>
 #include <string.h>
 
-// board size
-#define ROWS 6
-#define COLS 7
+
+// max size
+#define MAX_ROWS 50
+#define MAX_COLS 50
+
+// normal size
+#define NORMAL_ROWS 6
+#define NORMAL_COLS 7
 
 // cell symbols
 #define EMPTY '.'
@@ -21,7 +25,7 @@ typedef struct
 {
     int rows;
     int cols;
-    char cells[ROWS][COLS];
+    char cells[MAX_ROWS][MAX_COLS];
 } Board;
 
 // Game struct - keeps all game info
@@ -33,7 +37,7 @@ typedef struct
     int moves;
     int p1undos;
     int p2undos;
-    int his[100];
+    int his[2500];
 } Game;
 
 int countInDirection(Board b, int row, int col, int dRow, int dCol, char piece);
@@ -51,6 +55,7 @@ int save(Game *g);
 int getHumanMove(Game g);
 int getMachineMove(Game g);
 int load(Game *g);
+int removepiece(Board *b, int col);
 void playGame(Game *g);
 
 // Counts the amount of times the piece appears in a direction
@@ -136,15 +141,11 @@ int checkDraw(Board b)
 // Initializes the board with EMPTY
 void initBoard(Board *b)
 {
-
-    b->rows = ROWS;
-    b->cols = COLS;
-
     int i, j;
 
-    for (i = 0; i < ROWS; i++)
+    for (i = 0; i < MAX_ROWS; i++)
     {
-        for (j = 0; j < COLS; j++)
+        for (j = 0; j < MAX_COLS; j++)
         {
             b->cells[i][j] = EMPTY;
         }
@@ -176,6 +177,8 @@ void printBoard(Board b)
     {
         printf("%d ", i + 1);
     }
+    printf("\n");
+    
 }
 
 // Checks if the column is between the normal values
@@ -205,6 +208,9 @@ int makeMove(Board *b, int col, char piece, int *row)
 {
     int i = 0;
 
+    if (b->cells[0][col] != EMPTY)
+        return 0;
+    
     while (i < b->rows)
     {
         if (b->cells[i][col] == EMPTY)
@@ -318,6 +324,7 @@ int getHumanMove(Game g)
 
     while (valido == 0)
     {
+        printf("\nEscreva \"guardar\" ou \"anular\" para realizar a acao");
         printf("\nJogador: %d - Escolha a coluna(1-%d): ", g.currentPlayer, g.board.cols);
 
         col = -1;
@@ -395,14 +402,18 @@ int removepiece(Board *b, int col){
     int i;
     
     for(i = 0; i < b->rows; i++){
-        if(b->cells[i][col] != 0){
-            b->cells[i][col] = 0;
+        if(b->cells[i][col] != EMPTY){
+            b->cells[i][col] = EMPTY;
         
             return 1;
         }
     }
-
+return 0;    
 }
+
+    
+
+
 
 void playGame(Game *g)
 {
@@ -411,6 +422,7 @@ void playGame(Game *g)
     int col, row;
     int game = 1;
     int undos, lastcol, prevcol;
+    
 
     printf("\nINICIO DO JOGO\n");
     printBoard(g->board);
@@ -444,10 +456,12 @@ void playGame(Game *g)
 
             if(g->currentPlayer == 1){
                 undos = g->p1undos;
+                if(undos > 0)
                 g->p1undos--;
             }
             else{
                 undos = g->p2undos;
+                if(undos > 0)
                 g->p2undos--;
             }
 
@@ -461,7 +475,11 @@ void playGame(Game *g)
 
                 g->moves -= 2;
 
-                printf("Jogadas anuladas com sucesso");
+                printf("Jogadas anuladas com sucesso\n");
+                printBoard(g->board);
+            }
+            else{
+                printf("Nao tem anulacoes disponiveis\n");
             }
 
             
@@ -519,6 +537,8 @@ int main()
 {
     Game g;
     int opt, mod;
+    int r, c, k;
+
 
     srand(time(NULL));
 
@@ -534,12 +554,16 @@ int main()
             {
                 g.mode = mod;
                 g.currentPlayer = 1;
+                g.board.cols = NORMAL_COLS;
+                g.board.rows = NORMAL_ROWS;
+
                 initBoard(&g.board);
 
                 g.moves = 0;
                 g.p1undos = 2;
                 g.p2undos = 2;
 
+                for(k=0; k<2500; k++) g.his[k] = 0;
                 playGame(&g);
             }
             else
@@ -558,8 +582,42 @@ int main()
         }
         else if (opt == 3)
         {
-            printf("Funcionalidade de configurar tabuleiro (Fase 2)...\n");
+            do{
+            printf("Insira o numero de linhas(6 - 50)");
+            scanf("%d",&r);
+            printf("Insira o numero de colunas(7 - 50)");
+            scanf("%d",&c);
+            
+            clearBuffer();
+
+            if (r < 6 || c < 7 || r > 50 || c > 50) 
+                printf("ERRO: Dimensoes invalidas!\n");
+            
+            }while(r < 6 || c < 7 || r > 50 || c > 50);
+        
+        printf("O tabuleiro tera %d linhas e %d colunas.\n", r, c);
+
+        g.board.rows = r;
+        g.board.cols = c;
+
+        mod = showModeMenu();
+
+        if(mod != 0){
+                
+                initBoard(&g.board);    
+                g.mode = mod;
+                g.currentPlayer = 1;
+
+                g.moves = 0;
+                g.p1undos = 2;
+                g.p2undos = 2;
+
+
+                for(k=0; k<2500; k++) g.his[k] = 0;
+                playGame(&g);
         }
+    }
+        
     } while (opt != 0);
     return 0;
 }
