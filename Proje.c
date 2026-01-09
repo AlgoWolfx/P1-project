@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdlib.h>
+#include <string.h>
 
 // board size
 #define ROWS 6
@@ -17,9 +19,9 @@
 // Board struct - keeps the game board data
 typedef struct
 {
-    int rows;                   
-    int cols;               
-    char cells[ROWS][COLS]; 
+    int rows;
+    int cols;
+    char cells[ROWS][COLS];
 } Board;
 
 // Game struct - keeps all game info
@@ -41,79 +43,77 @@ int makeMove(Board *b, int col, char piece, int *row);
 void clearBuffer(void);
 int showMainMenu(void);
 int showModeMenu(void);
+int save(Game *g);
 int getHumanMove(Game g);
 int getMachineMove(Game g);
+int load(Game *g);
 void playGame(Game *g);
 
-
-//Counts the amount of times the piece appears in a direction
+// Counts the amount of times the piece appears in a direction
 int countInDirection(Board b, int row, int col, int dRow, int dCol, char piece)
 {
     int count = 0;
-    int r = row + dRow; 
+    int r = row + dRow;
     int c = col + dCol;
 
-   while (r >= 0 && r < b.rows && c >= 0 && c < b.cols)
+    while (r >= 0 && r < b.rows && c >= 0 && c < b.cols)
     {
         if (b.cells[r][c] == piece)
         {
             count++;
-            r += dRow; 
+            r += dRow;
             c += dCol;
         }
         else
         {
-            break; 
+            break;
         }
     }
 
     return count;
 }
 
-//checks after every play if it wins the game
+// checks after every play if it wins the game
 int checkWin(Board b, int row, int col, char piece)
 {
     int total;
 
     total = 1;
     total += countInDirection(b, row, col, 0, -1, piece);
-    total += countInDirection(b, row, col, 0, 1, piece);  
+    total += countInDirection(b, row, col, 0, 1, piece);
     if (total >= WIN_LENGTH)
     {
         return 1; // horizontal
     }
 
-    
     total = 1;
-    total += countInDirection(b, row, col, -1, 0, piece); 
-    total += countInDirection(b, row, col, 1, 0, piece); 
+    total += countInDirection(b, row, col, -1, 0, piece);
+    total += countInDirection(b, row, col, 1, 0, piece);
     if (total >= WIN_LENGTH)
     {
         return 1; // vertical
     }
 
-    
     total = 1;
-    total += countInDirection(b, row, col, -1, -1, piece); 
-    total += countInDirection(b, row, col, 1, 1, piece);   
+    total += countInDirection(b, row, col, -1, -1, piece);
+    total += countInDirection(b, row, col, 1, 1, piece);
     if (total >= WIN_LENGTH)
     {
         return 1; // diagonal
     }
 
-    
     total = 1;
     total += countInDirection(b, row, col, -1, 1, piece);
-    total += countInDirection(b, row, col, 1, -1, piece); 
+    total += countInDirection(b, row, col, 1, -1, piece);
     if (total >= WIN_LENGTH)
     {
-        return 1; // diagonal 
+        return 1; // diagonal
     }
 
     return 0;
 }
 
-//checks Draw after every play 
+// checks Draw after every play
 int checkDraw(Board b)
 {
     int col;
@@ -122,13 +122,12 @@ int checkDraw(Board b)
     {
         if (b.cells[0][col] == EMPTY)
         {
-            return 0; 
+            return 0;
         }
     }
 
-    return 1; 
+    return 1;
 }
-
 
 // Initializes the board with EMPTY
 void initBoard(Board *b)
@@ -196,7 +195,6 @@ int isColumnFull(Board b, int col)
 
     else
         return 0;
-
 }
 // Finds the lowest row, places the piece , and updates the row value
 int makeMove(Board *b, int col, char piece, int *row)
@@ -205,10 +203,12 @@ int makeMove(Board *b, int col, char piece, int *row)
 
     while (i < b->rows)
     {
-        if(b->cells[i][col] == EMPTY){
-        i++;
+        if (b->cells[i][col] == EMPTY)
+        {
+            i++;
         }
-        else{
+        else
+        {
             break;
         }
     }
@@ -219,12 +219,11 @@ int makeMove(Board *b, int col, char piece, int *row)
     return 1;
 }
 
-
-
 // clearBuffer - read characters until newline
 void clearBuffer(void)
 {
-    while (getchar() != '\n'); 
+    while (getchar() != '\n')
+        ;
 }
 
 // showMainMenu - show menu, return 1 for new game, 0 for exit
@@ -237,8 +236,8 @@ int showMainMenu(void)
     {
         i = -1;
 
-        printf("Bem-vindo ao Jogo Quatro-em-linha!\n");
-        printf("Por favor digite a opçao que prentende: \n");
+        printf("\nBem-vindo ao Jogo Quatro-em-linha!\n");
+        printf("Por favor digite a opcao que prentende: \n");
         printf("1 - Iniciar Novo Jogo\n");
         printf("2 - Retomar Jogo Guardado\n");
         printf("3 - Configurar Tabuleiro\n");
@@ -249,7 +248,7 @@ int showMainMenu(void)
         clearBuffer();
 
         if (i < 0 || i > 3)
-            printf("Opçao do menu inválida!");
+            printf("\nOpcao do menu invalida!\n");
 
     } while (i < 0 || i > 3);
     return i;
@@ -264,9 +263,9 @@ int showModeMenu(void)
     {
         j = -1;
 
-        printf("Por favor digite o modo que pretende: \n");
+        printf("\nPor favor digite o modo que pretende: \n");
         printf("1 - Humano x Humano\n");
-        printf("2 - Humano x Máquina\n");
+        printf("2 - Humano x Maquina\n");
         printf("0 - Voltar ao menu anterior\n");
 
         scanf("%d", &j);
@@ -274,40 +273,72 @@ int showModeMenu(void)
         clearBuffer();
 
         if (j < 0 || j > 2)
-            printf("\nOpcão do menu inválida!");
+            printf("\nOpcao do menu invalida!\n");
 
     } while (j < 0 || j > 2);
     return j;
 }
 
+// saves the game file
+int save(Game *g)
+{
+    FILE *f = fopen("jogo.bin", "wb");
+
+    if(f == NULL){
+        printf("\nErro ao guardar o jogo.\n");
+        return 0;
+    }
+
+    size_t result = fwrite(g, sizeof(Game), 1, f);
+
+    fclose(f);
+
+    if(result != 1){
+        printf("\nErro ao escrever os dados.\n");
+    }
+
+    printf("\nJogo guardado com sucesso.\n");
+    return 1;
+
+}
+
+
+
 //  getHumanMove - ask player for column, validate, return column index
 
 int getHumanMove(Game g)
 {
+    char text[100];
     int col;
     int valido = 0;
 
-    while(valido == 0)
+    while (valido == 0)
     {
-        printf("\nJogador: %d - Escolha a coluna(1-%d) ", g.currentPlayer, g.board.cols);
+        printf("\nJogador: %d - Escolha a coluna(1-%d): ", g.currentPlayer, g.board.cols);
 
         col = -1;
-        scanf("%d", &col);
+        scanf("%s", text);
         clearBuffer();
 
+        if(strcmp(text , "guardar") == 0){
+            save(&g);
+            return -2;
+        }
+        
+        col = atoi(text);
+        
         col--;
 
         if (isColumnValid(g.board, col) != 1)
         {
-            printf("\nJogada inválida! (Coluna inexistente)\n");
-            
+            printf("\nJogada invalida! (Coluna inexistente)\n");
         }
         else if (isColumnFull(g.board, col) == 1)
-        {   
-            printf("Jogada inválida! (Coluna cheia)\n");
-            
+        {
+            printf("\nJogada invalida! (Coluna cheia)\n");
         }
-        else{
+        else
+        {
             valido = 1;
         }
     }
@@ -324,11 +355,32 @@ int getMachineMove(Game g)
 
     } while (isColumnFull(g.board, col));
 
-    printf("A Maquina jogou na coluna %d\n", col + 1);
+    printf("\nA Maquina jogou na coluna %d\n", col + 1);
 
     return col;
 }
 
+
+
+int load(Game *g){
+
+    FILE *f = fopen("jogo.bin", "rb");
+
+    if(f == NULL){
+        return 0;
+    }
+
+    size_t result = fread(g, sizeof(Game), 1, f);
+
+    fclose(f);
+
+    if(result != 1){
+        printf("\nErro no ficheiro guardado.\n");
+        return 0;
+    }
+    
+    return 1;
+}
 // playGame - main game loop
 
 void playGame(Game *g)
@@ -338,7 +390,7 @@ void playGame(Game *g)
     int col, row;
     int game = 1;
 
-    printf("INICIO DO JOGO");
+    printf("\nINICIO DO JOGO\n");
     printBoard(g->board);
 
     while (game == 1)
@@ -354,11 +406,15 @@ void playGame(Game *g)
                 col = getHumanMove(*g);
             }
             else
-            {   
+            {
                 col = getMachineMove(*g);
             }
         }
 
+        if(col == -2){
+            break;
+        }
+        
         char piece;
 
         if (g->currentPlayer == 1)
@@ -375,13 +431,17 @@ void playGame(Game *g)
 
         if (checkWin(g->board, row, col, piece))
         {
-            printf("Parabens! O jogador %d ganhou!\n", g->currentPlayer);
+            printf("\nParabens! O jogador %d ganhou!\n", g->currentPlayer);
             game = 0;
+
+            remove("jogo.bin");
         }
         else if (checkDraw(g->board))
         {
-            printf("O jogo terminou empatado");
+            printf("\nO jogo terminou empatado\n");
             game = 0;
+
+            remove("jogo.bin");
         }
         else
         {
@@ -398,35 +458,47 @@ void playGame(Game *g)
 }
 
 // TODO: main - program entry point
-int main(){
+int main()
+{
     Game g;
     int opt, mod;
 
     srand(time(NULL));
 
-
-    do{
+    do
+    {
         opt = showMainMenu();
 
-        if(opt == 1){
+        if (opt == 1)
+        {
             mod = showModeMenu();
 
-            if(mod != 0){
+            if (mod != 0)
+            {
                 g.mode = mod;
                 g.currentPlayer = 1;
                 initBoard(&g.board);
 
                 playGame(&g);
             }
-            else 
+            else
                 continue;
         }
-        else if (opt == 2) {
-            printf("Funcionalidade de retomar jogo (Fase 2)...\n");
+        else if (opt == 2)
+        {
+            if(load(&g) == 1){
+                printf("\nJogo carregado.\n");
+
+                playGame(&g);
+            }
+            else{
+                printf("\nErro ao carregar o jogo.\n");
+            }
         }
-        else if (opt == 3) {
+        else if (opt == 3)
+        {
             printf("Funcionalidade de configurar tabuleiro (Fase 2)...\n");
         }
-    }while(opt != 0);
-return 0;
+    } while (opt != 0);
+    return 0;
 }
