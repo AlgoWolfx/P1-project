@@ -55,7 +55,7 @@ int save(Game *g);
 int getHumanMove(Game g);
 int getMachineMove(Game g);
 int load(Game *g);
-int removepiece(Board *b, int col);
+int removePiece(Board *b, int col);
 void playGame(Game *g);
 
 // Counts the amount of times the piece appears in a direction
@@ -232,8 +232,7 @@ int makeMove(Board *b, int col, char piece, int *row)
 // clearBuffer - read characters until newline
 void clearBuffer(void)
 {
-    while (getchar() != '\n')
-        ;
+    while (getchar() != '\n');
 }
 
 // showMainMenu - show menu, return 1 for new game, 0 for exit
@@ -292,6 +291,8 @@ int showModeMenu(void)
 // saves the game file
 int save(Game *g)
 {
+    int res;
+    
     FILE *f = fopen("jogo.bin", "wb");
 
     if(f == NULL){
@@ -299,11 +300,11 @@ int save(Game *g)
         return 0;
     }
 
-    size_t result = fwrite(g, sizeof(Game), 1, f);
+    res = fwrite(g, sizeof(Game), 1, f);
 
     fclose(f);
 
-    if(result != 1){
+    if(res != 1){
         printf("\nErro ao escrever os dados.\n");
     }
 
@@ -327,7 +328,7 @@ int getHumanMove(Game g)
         printf("\nEscreva \"guardar\" ou \"anular\" para realizar a acao");
         printf("\nJogador: %d - Escolha a coluna(1-%d): ", g.currentPlayer, g.board.cols);
 
-        col = -1;
+        col = -1;          
         scanf("%s", text);
         clearBuffer();
 
@@ -378,17 +379,18 @@ int getMachineMove(Game g)
 
 int load(Game *g){
 
+    int res;
     FILE *f = fopen("jogo.bin", "rb");
 
     if(f == NULL){
         return 0;
     }
 
-    size_t result = fread(g, sizeof(Game), 1, f);
+    res = fread(g, sizeof(Game), 1, f);
 
     fclose(f);
 
-    if(result != 1){
+    if(res != 1){
         printf("\nErro no ficheiro guardado.\n");
         return 0;
     }
@@ -397,7 +399,7 @@ int load(Game *g){
 }
 // playGame - main game loop
 
-int removepiece(Board *b, int col){
+int removePiece(Board *b, int col){
 
     int i;
     
@@ -412,9 +414,6 @@ return 0;
 }
 
     
-
-
-
 void playGame(Game *g)
 {
 
@@ -470,8 +469,8 @@ void playGame(Game *g)
                 prevcol = g->his[g->moves - 2];
             
 
-                removepiece(&g->board, lastcol);
-                removepiece(&g->board, prevcol);
+                removePiece(&g->board, lastcol);
+                removePiece(&g->board, prevcol);
 
                 g->moves -= 2;
 
@@ -532,7 +531,6 @@ void playGame(Game *g)
     }
 }
 
-// TODO: main - program entry point
 int main()
 {
     Game g;
@@ -550,7 +548,7 @@ int main()
         {
             mod = showModeMenu();
 
-            if (mod != 0)
+            if (mod != 0)   
             {
                 g.mode = mod;
                 g.currentPlayer = 1;
@@ -563,7 +561,9 @@ int main()
                 g.p1undos = 2;
                 g.p2undos = 2;
 
-                for(k=0; k<2500; k++) g.his[k] = 0;
+                for(k=0; k<2500; k++) {
+                g.his[k] = 0;
+                }
                 playGame(&g);
             }
             else
